@@ -14,7 +14,11 @@ module.exports = function(eleventyConfig) {
         return DateTime.fromJSDate(dateObj, {zone: 'utc'}).toFormat('yyyy-LL-dd');
     });
 
+    const isProduction = process.env.NODE_ENV === 'production';
+
     return {
+        pathPrefix: isProduction ? "/my-eleventy-blog/" : "/",
+
         dir: {
             input: "src",
             output: "_site",
