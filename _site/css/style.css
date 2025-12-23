@@ -1,13 +1,11 @@
-/* We will add font rules here */
 body {
-    font-family: sans-serif; /* A boring default font */
+    font-family: sans-serif;
     line-height: 1.6;
     max-width: 800px;
     margin: 2rem auto;
     padding: 0 1rem;
 }
 
-/* 1. Define Color Palette */
 :root {
     --bg-color: #1a1a1a;
     --text-color: #e0e0e0;
@@ -27,10 +25,9 @@ body {
     color: var(--text-color);
 }
 
-/* 3. Style Specific Elements */
 h1, h2, h3 {
     color: var(--heading-color);
-    font-weight: 400; /* Lobster is already bold */
+    font-weight: 400;
 }
 
 a {
@@ -56,7 +53,7 @@ a:hover {
 .post-list a {
     font-size: 1rem;
     font-weight: bold;
-    color: var(--heading-color); /* Use the same color as headings */
+    color: var(--heading-color);
     text-decoration: none;
 }
 
@@ -67,19 +64,19 @@ a:hover {
 
 .post-meta {
     font-size: 0.9rem;
-    color: #9e9e9e; /* A lighter gray for metadata */
+    color: #9e9e9e;
     margin-top: 0.25rem;
 }
 
 pre[class*="language-"] {
-    border: 1px solid #4a4a4a;   /* This adds the border */
-    border-radius: 8px;           /* A nice rounded corner */
-    padding: 1.5em 1em;           /* More vertical and some horizontal padding */
-    margin: 2em 0;                /* Space above and below the block */
-    overflow: auto;               /* Add scrollbars if code is too long */
+    border: 1px solid #4a4a4a;
+    border-radius: 8px;
+    padding: 1.5em 1em;
+    margin: 2em 0;
+    overflow: auto;
 }
 
 code[class*="language-"] {
-    font-size: 0.9em;             /* Slightly smaller font size for code */
-    font-family: 'Fira Code', 'Consolas', 'Menlo', 'Monaco', monospace; /* A nice coding font */
+    font-size: 0.9em;
+    font-family: 'Fira Code', 'Consolas', 'Menlo', 'Monaco', monospace;
 }
