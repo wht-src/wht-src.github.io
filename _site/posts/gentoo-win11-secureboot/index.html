@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Duel booting Gentoo and Windows 11 with Secure Boot</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/prism-okaidia.css">
+</head>
+<body>
+    <main>
+        
+  <article>
+    <h1>Duel booting Gentoo and Windows 11 with Secure Boot</h1>
+    <p class="post-meta">
+      <time datetime="2025-12-23">Dec 23, 2025</time>
+    </p>
+
+    <p>Supposed you as a Linux user wants to play some Battlefield 6. Won't run
+on linux. You know, or whatever game that requires that TPM2.0 plus secureboot.
+Clearly a VM won't cut it at this rate, and you still want Gentoo, so whats left
+for you is duel booting (or WSL, we don't talk about WSL). Then you ask yourself,
+how do I do that?</p>
+<p>In this guide, we will be installing Gentoo with the following layout:</p>
+<ul>
+<li><code>gentoo-kernel-bin</code>, because nobody has time to wait for the compilation</li>
+<li>dracut</li>
+<li>grub, it's old and bloated, but requires the least hassle on my end</li>
+<li>one efi partition, already created by windows</li>
+<li>you use UEFI (duh)</li>
+<li>recommended: you have already installed Gentoo before and knows the gist of installation,
+knows how to install package with <code>emerge</code> and knows the basics of tweaking <code>make.conf</code></li>
+</ul>
+<p>This guide is quick and dirty, if you want explinations on what these commands means,
+look it up with a search engine.</p>
+<h2>Install Windows</h2>
+<p>Skip this step if you have already installed Windows.</p>
+<p>Microsoft doesn't envision you installing another operating system. If you install
+gentoo first they would just mess up the bootloader or do some equally bad things.
+Download Windows media creation tool from <a href="https://www.microsoft.com/en-us/software-download/windows11">here</a>.
+Plug your USB into your box and run it. Follow the instructions in the app to make a
+bootable media. Then open UEFI settings, disable secure boot and then boot the Windows
+installation medium. Afterwards, just install windows as you normally do.</p>
+<p>Don't try to use something like Etcher to flash the iso downloaded from the Microsoft
+site into your USB. Won't work. Don't ask me why.</p>
+<h2>Shrink Windows partition</h2>
+<p>Press the Windows key and search up <code>Create and format hard disk partitions</code>. Open it.
+In the bottom of Disk Management, you should see 3 partitions for the disk you installed
+windows on. <code>EFI System Partition</code>, <code>Windows (C:)</code> and <code>Recovery Partition</code>. Right click
+<code>Windows (C:)</code> and <code>Shrink Volume...</code> Shrink it to make an empty partition of least 3GB.</p>
+<h2>Downloading and booting the Arch ISO</h2>
+<p>Yes, we are using the Arch Linux ISO to install Gentoo. It is much more user friendly than
+the Gentoo minimal installation ISO. Download it <a href="https://archlinux.org/download/">here</a>.<br>
+Flash it into your USB (this time, I recommend <a href="https://etcher.balena.io/">Etcher</a>). Open
+UEFI and boot it.</p>
+<p>Alternatively, do the same but with <a href="https://www.gentoo.org/downloads/">Gentoo ISO</a>.</p>
+<p>Another alternative is to just get whatever GUI Linux ISO out there.</p>
+<p>In this guide, I will be using the Arch ISO.</p>
+<p>Since you are on a non-gui ISO, you can't copy and paste commands. Set root password by running
+<code>passwd</code>, then activate <code>sshd</code> if not already. <code>ssh</code> in from another device. You can now copy
+and paste commands. In fact, you can use an Android phone with Termux to do the ssh connection.</p>
+<h2>Connecting to WiFI</h2>
+<p>Goes without saying, skip if you use ethernet.</p>
+<ol>
+<li>Run <code>iwctl</code></li>
+<li>Find your wireless adapter name by running <code>device list</code>, in my case it is <code>wlan0</code></li>
+<li>Run <code>station wlan0 scan</code></li>
+<li>Run <code>station wlan0 get-networks</code>, look for your WiFi</li>
+<li>Run <code>station wlan0 connect &quot;Your_Network_SSID&quot;</code>, enter your password and press enter</li>
+<li>exit by pressing <code>control+d</code> on your keyboard</li>
+<li><code>ping gnu.org</code> to see if its working, press <code>control+c</code> to stop pinging</li>
+<li>Profit</li>
+</ol>
+<p>With the Gentoo minimal installation ISO you will need <code>wpa_supplicant</code>.
+Guide <a href="https://www.youtube.com/watch?v=QGyHDIYlLFA">here</a>. I have to confess
+the main reason I like to use Arch ISO is because I hate <code>wpa_supplicant</code>.</p>
+<h2>Prepare the disk and mount</h2>
+<ol>
+<li>Run <code>lsblk</code>. Find your main disk. In my case it is <code>nvme0n1</code>.</li>
+<li><code>cfdisk /dev/nvme0n1</code>.</li>
+<li>Create a singular partition to replace the empty hole you made after shrinking <code>C drive</code>.</li>
+<li>Write and quit. Don't make any more partitions. (Swap is an exception if you need it)</li>
+<li>Run <code>lsblk</code> again and note down the name of said partition. In my device, <code>/dev/nvme0n1p5</code>.
+It will be the root partition.</li>
+<li>Also note down the Windows created EFI partition name. In my case, <code>/dev/nvme0n1p1</code></li>
+<li>Format the root partition. I will be using xfs in this case. <code>mkfs.xfs /dev/nvme0n1p5</code></li>
+<li>Create the mount directory. <code>mkdir -p /mnt/gentoo</code></li>
+<li>Mount the root. <code>mount /dev/nvme0n1p5 /mnt/gentoo</code></li>
+<li>Create the EFI directory. <code>mkdir /mnt/gentoo/efi</code></li>
+<li>Mount the EFI partition. <code>mount /dev/nvme0n1p1 /mnt/gentoo/efi</code></li>
+</ol>
+<h2>Installing Gentoo</h2>
+<p>From this point on you will want to read the <a href="https://wiki.gentoo.org/wiki/Handbook:AMD64/Installation/Stage">Gentoo handbook installing stage file section</a>.</p>
+<p>Now get the stage file by <code>cd /mnt/gentoo</code> then <code>curl -O link-to-stage3-tarball</code>. Find the
+link by copying and pasting the link to the stage3 tarball you desire in <a href="https://www.gentoo.org/downloads/">here</a>.
+Optionally verify the tarball as per instruction on the handbook.</p>
+<p>Extract the tarball: <code>tar xpvf stage3-*.tar.xz --xattrs-include='*.*' --numeric-owner -C /mnt/gentoo</code>
+Note that you must be in the same directory as the tarball to make this work.</p>
+<p>Now follow the <code>Configuring compile options</code> on the Gentoo handbook and onwards. Stop when you
+reaches the <code>Configuring the Linux kernel</code> stage.</p>
+<h2>Configuring secure boot</h2>
+<p>Now for the secure boot part.</p>
+<p>In the <code>/etc/portage/make.conf</code> file you will make the following changes:</p>
+<ol>
+<li>Add <code>dist-kernel networkmanager secureboot</code> to the USE flags</li>
+<li>Add these lines:</li>
+</ol>
+<pre class="language-bash"><code class="language-bash"><span class="token assign-left variable">SECUREBOOT_SIGN_KEY</span><span class="token operator">=</span><span class="token string">"/root/secureboot/MOK.key"</span>
+<span class="token assign-left variable">SECUREBOOT_SIGN_CERT</span><span class="token operator">=</span><span class="token string">"/root/secureboot/MOK.pem"</span>
+
+<span class="token comment"># if you use the modules-sign use flag, include the following</span>
+<span class="token comment"># gentoo-kernel-bin is presigned so you can skip them</span>
+<span class="token assign-left variable">MODULES_SIGN_KEY</span><span class="token operator">=</span><span class="token string">"/root/secureboot/MOK.key"</span>
+<span class="token assign-left variable">MODULES_SIGN_CERT</span><span class="token operator">=</span><span class="token string">"/root/secureboot/MOK.pem"</span>
+
+<span class="token assign-left variable">GRUB_PLATFORMS</span><span class="token operator">=</span><span class="token string">"efi-64"</span></code></pre>
+<p>Make the file <code>/etc/portage/package.use/installkernel</code> then add the line</p>
+<pre class="language-bash"><code class="language-bash">sys-kernel/installkernel dracut grub</code></pre>
+<p>Make another file <code>/etc/portage/package.use/grub</code> then add the line</p>
+<pre class="language-bash"><code class="language-bash">sys-boot/grub <span class="token function">mount</span></code></pre>
+<p>Then edit <code>/etc/dracut.conf.d/secureboot.conf</code> (make the directory and the file if they doesn't
+don't exist), insert these lines:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token assign-left variable">uefi_secureboot_cert</span><span class="token operator">=</span><span class="token string">"/root/secureboot/MOK.pem"</span>
+<span class="token assign-left variable">uefi_secureboot_key</span><span class="token operator">=</span><span class="token string">"/root/secureboot/MOK.key"</span></code></pre>
+<p>Following that, install <code>sys-kernel/linux-firmware</code> and the microcode of your choice.</p>
+<p>Install the secure boot utilities of <code>sys-boot/shim sys-boot/mokutil sys-boot/efibootmgr</code>.</p>
+<p>Make/edit <code>/etc/env.d/99grub</code>, add the line:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token assign-left variable">GRUB_CFG</span><span class="token operator">=</span>/efi/EFI/Gentoo/grub.cfg</code></pre>
+<p>Then run <code>env-update</code></p>
+<p>We are now going to make the secure boot keys thing. Run the following commands:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">mkdir</span> <span class="token parameter variable">-p</span> /root/secureboot 
+
+<span class="token comment"># replace alice with your name</span>
+openssl req <span class="token parameter variable">-new</span> <span class="token parameter variable">-nodes</span> <span class="token parameter variable">-utf8</span> <span class="token parameter variable">-sha256</span> <span class="token parameter variable">-x509</span> <span class="token parameter variable">-outform</span> PEM <span class="token parameter variable">-out</span> /root/secureboot/MOK.pem <span class="token parameter variable">-keyout</span> /root/secureboot/MOK.key <span class="token parameter variable">-subj</span> <span class="token string">"/CN=alice/"</span>
+openssl x509 <span class="token parameter variable">-in</span> /root/secureboot/MOK.pem <span class="token parameter variable">-outform</span> DER <span class="token parameter variable">-out</span> /root/secureboot/MOK.der
+
+<span class="token comment"># install grub and installkernel</span>
+<span class="token comment"># in case you somehow emerged grub before changing the useflags, pass `--update --newuse` flags to `emerge`.</span>
+emerge <span class="token parameter variable">-a</span> sys-kernel/installkernel sys-boot/grub
+
+<span class="token comment"># install grub </span>
+grub-install --efi-directory<span class="token operator">=</span>/efi</code></pre>
+<p>Now import the keys:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token comment"># you will need to set the password </span>
+<span class="token comment"># both command will ask you to set the password, set both password to the same password</span>
+<span class="token comment"># to avoid complications</span>
+
+mokutil --ignore-keyring <span class="token parameter variable">--import</span> /root/secureboot/MOK.der
+<span class="token comment"># replace the version with your kernel version</span>
+mokutil --ignore-keyring <span class="token parameter variable">--import</span> /usr/src/linux-6.12.58-gentoo-dist/certs/signing_key.x509</code></pre>
+<p>Also install os-prober to detect windows: <code>emerge -a sys-boot/os-prober</code>
+Enable os-prober by setting <code>GRUB_DISABLE_OS_PROBER=false</code> in <code>/etc/default/grub</code>. Change the line if exist,
+append the line if it doesn't exist.</p>
+<p>Run the following:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">cp</span> /usr/share/shim/BOOTX64.EFI /efi/EFI/Gentoo/shimx64.efi
+<span class="token function">cp</span> /usr/share/shim/mmx64.efi /efi/EFI/Gentoo/mmx64.efi
+<span class="token function">cp</span> /usr/lib/grub/grub-x86_64.efi.signed /efi/EFI/Gentoo/grubx64.efi
+
+<span class="token comment"># replace /dev/nvme0n1 with your boot disk </span>
+<span class="token comment"># replace the number 1 in --part 1 with the boot partition id, should just be 1 because </span>
+<span class="token comment"># our efi partition is /dev/nvme0n1p1</span>
+efibootmgr <span class="token parameter variable">--create</span> <span class="token parameter variable">--disk</span> /dev/nvme0n1 <span class="token parameter variable">-disk</span> <span class="token parameter variable">--part</span> <span class="token number">1</span> <span class="token parameter variable">--loader</span> <span class="token string">'\EFI\Gentoo\shimx64.efi'</span> <span class="token parameter variable">--label</span> <span class="token string">'GRUB via Shim'</span> <span class="token parameter variable">--unicode</span>
+
+<span class="token comment"># install the kernel</span>
+emerge <span class="token parameter variable">-a</span> sys-kernel/gentoo-kernel-bin
+
+<span class="token comment"># make the config</span>
+<span class="token function">grub-mkconfig</span> <span class="token parameter variable">-o</span> /efi/EFI/Gentoo/grub.cfg</code></pre>
+<p>You should be golden.
+Now follow the <code>Configuring the system</code> and the <code>Installing tools</code> section
+of the handbook.</p>
+<p>Note that for the internet package, I recommend installing networkmanager with the
+<code>iwd</code> USE flag. That way you can connect to the internet after rebooting. Avoid
+<code>wpa_supplicant</code> because I really don't like it.</p>
+<h2>Finalizing</h2>
+<p>Run <code>passwd</code> to set root password.</p>
+<p>Run <code>exit</code> to quit chroot.<br>
+Run <code>cd</code> then run <code>umount -R /mnt/gentoo</code>.
+Run <code>reboot</code>.
+Unplug the USB.</p>
+<p>Your box should boot to grub with shim, if not, edit UEFI settings to push it to the
+front of the boot order.</p>
+<p>You will be met with shim UEFI key management. It should say Press any key to perform
+MOK management. Press any key. Use arrow keys to move. Select Enroll MOK, press enter.
+View all the keys. Then press continue. Select yes when asked to enroll the key(s). Enter
+the password you set while importing the keys with <code>mokutil</code> command (you can now safely
+forget that password) and reboot.</p>
+<p>Enter UEFI settings and turn secure boot on.
+Pray that you boot into the the grub menu.
+Pray that grub boots your kernel.</p>
+<p>If nothing goes wrong, enjoy Gentoo and Windows duel boot. Now you can play Battlefield 6
+and occationally use your box to write code or do Linux things in general.</p>
+<h2>When things go wrong</h2>
+<p>Install <code>net-irc/weechat</code> or whatever IRC client that runs, connect to Libera
+by <code>irc.libera.chat:6697</code>, then ask for help on <code>#gentoo</code>.</p>
+<p>You may be asked to paste logs. Install <code>app-text/wgetpaste</code> to upload your logs
+to the internet and send them the output url. Good luck.</p>
+
+  </article>
+
+  <p><a href="/">Back to Home</a></p>
+
+    </main>
+</body>
+</html>
