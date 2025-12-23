@@ -3,10 +3,9 @@ name: Build and Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main # Deploys when you push to the main branch
-  workflow_dispatch: # Allows you to manually trigger a deployment
+      - main
+  workflow_dispatch:
 
-# Allow this job to clone the repo and create a page deployment
 permissions:
   contents: read
   pages: write
@@ -22,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20' # Use a recent LTS version of Node.js
+          node-version: '20'
           cache: 'npm'
 
       - name: Install dependencies
@@ -31,12 +30,12 @@ jobs:
       - name: Build the site
         run: npx @11ty/eleventy
         env:
-          NODE_ENV: production # Sets the environment variable for the pathPrefix
+          NODE_ENV: production
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '_site' # The folder Eleventy builds to
+          path: '_site'
 
   deploy:
     needs: build
