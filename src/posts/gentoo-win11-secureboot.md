@@ -115,7 +115,7 @@ reaches the `Configuring the Linux kernel` stage.
 Now for the secure boot part. 
 
 In the `/etc/portage/make.conf` file you will make the following changes:
-1. Add `dist-kernel networkmanager secureboot` to the USE flags
+1. Add `dist-kernel secureboot` to the USE flags
 1. Add these lines:
 ```bash
 SECUREBOOT_SIGN_KEY="/root/secureboot/MOK.key"
