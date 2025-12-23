@@ -39,6 +39,13 @@ installation medium. Afterwards, just install windows as you normally do.
 Don't try to use something like Etcher to flash the iso downloaded from the Microsoft
 site into your USB. Won't work. Don't ask me why.
 
+## Turn off fast startup
+
+Fast startup breaks some features of Linux. Turn it off.
+
+Open `Control Panel` > `Power Options` > `Choose what the power buttons do`, 
+click `Change settings that are currently unavailable`, then 
+uncheck `Turn on fast startup` and click `Save`.
 
 ## Shrink Windows partition 
 
@@ -237,6 +244,10 @@ Pray that grub boots your kernel.
 
 If nothing goes wrong, enjoy Gentoo and Windows duel boot. Now you can play Battlefield 6 
 and occationally use your box to write code or do Linux things in general.
+
+Side note, dual boot may cause time desync between 2 systems. In Linux SystemD you can 
+run `timedatectl set-local-rtc 1` with root permissions to fix it. The OpenRC fix is 
+much more annoying, plus I don't use OpenRC. You as the reader can search up how to do that.
 
 ## When things go wrong 
 
