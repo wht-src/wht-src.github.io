@@ -140,7 +140,7 @@ Handler<span class="token punctuation">.</span>onReq<span class="token punctuati
       FailResponse<span class="token punctuation">(</span><span class="token string">"body or username does not exist"</span><span class="token punctuation">)</span>
 <span class="token punctuation">)</span></code></pre>
 <p>Sometimes when you want to inject error information into
-an option monad, you can also use an result monad.</p>
+an option monad, you can also use a result monad.</p>
 <pre class="language-scala"><code class="language-scala"><span class="token keyword">enum</span> Result<span class="token punctuation">[</span><span class="token operator">+</span>T<span class="token punctuation">,</span> <span class="token operator">+</span>E<span class="token punctuation">]</span><span class="token operator">:</span>
   <span class="token keyword">case</span> Ok<span class="token punctuation">(</span>value<span class="token operator">:</span> T<span class="token punctuation">)</span>
   <span class="token keyword">case</span> Err<span class="token punctuation">(</span>err<span class="token operator">:</span> E<span class="token punctuation">)</span>

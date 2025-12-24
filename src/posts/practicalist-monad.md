@@ -168,7 +168,7 @@ Handler.onReq(req =>
 ```
 
 Sometimes when you want to inject error information into 
-an option monad, you can also use an result monad.
+an option monad, you can also use a result monad.
 ```scala
 enum Result[+T, +E]:
   case Ok(value: T)
