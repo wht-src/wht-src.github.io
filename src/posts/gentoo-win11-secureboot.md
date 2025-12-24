@@ -117,6 +117,14 @@ Note that you must be in the same directory as the tarball to make this work.
 Now follow the `Configuring compile options` on the Gentoo handbook and onwards. Stop when you
 reaches the `Configuring the Linux kernel` stage. 
 
+Side note: In the mounting the necessary filesystems section of the Gentoo 
+handbook, you don't need to type all the mount commands as Arch ISO also has the
+`arch-chroot` utility pre-installed. Just do `arch-chroot /mnt/gentoo` and you will be fine.
+You then `source /etc/profile` and optionally indicate you are in a chroot by 
+`export PS1="(chroot) ${PS1}"`. Then skip the pareparing for a bootloader section 
+because you have already mounted the EFI partition. Continue following the handbook
+from the configuring portage section and onwards.
+
 ## Configuring secure boot
 
 Now for the secure boot part. 
