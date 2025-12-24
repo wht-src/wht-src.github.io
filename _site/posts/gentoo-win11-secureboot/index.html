@@ -43,6 +43,11 @@ bootable media. Then open UEFI settings, disable secure boot and then boot the W
 installation medium. Afterwards, just install windows as you normally do.</p>
 <p>Don't try to use something like Etcher to flash the iso downloaded from the Microsoft
 site into your USB. Won't work. Don't ask me why.</p>
+<h2>Turn off fast startup</h2>
+<p>Fast startup breaks some features of Linux. Turn it off.</p>
+<p>Open <code>Control Panel</code> &gt; <code>Power Options</code> &gt; <code>Choose what the power buttons do</code>,
+click <code>Change settings that are currently unavailable</code>, then
+uncheck <code>Turn on fast startup</code> and click <code>Save</code>.</p>
 <h2>Shrink Windows partition</h2>
 <p>Press the Windows key and search up <code>Create and format hard disk partitions</code>. Open it.
 In the bottom of Disk Management, you should see 3 partitions for the disk you installed
@@ -102,7 +107,7 @@ reaches the <code>Configuring the Linux kernel</code> stage.</p>
 <p>Now for the secure boot part.</p>
 <p>In the <code>/etc/portage/make.conf</code> file you will make the following changes:</p>
 <ol>
-<li>Add <code>dist-kernel networkmanager secureboot</code> to the USE flags</li>
+<li>Add <code>dist-kernel secureboot</code> to the USE flags</li>
 <li>Add these lines:</li>
 </ol>
 <pre class="language-bash"><code class="language-bash"><span class="token assign-left variable">SECUREBOOT_SIGN_KEY</span><span class="token operator">=</span><span class="token string">"/root/secureboot/MOK.key"</span>
@@ -190,6 +195,9 @@ Pray that you boot into the the grub menu.
 Pray that grub boots your kernel.</p>
 <p>If nothing goes wrong, enjoy Gentoo and Windows duel boot. Now you can play Battlefield 6
 and occationally use your box to write code or do Linux things in general.</p>
+<p>Side note, dual boot may cause time desync between 2 systems. In Linux SystemD you can
+run <code>timedatectl set-local-rtc 1</code> with root permissions to fix it. The OpenRC fix is
+much more annoying, plus I don't use OpenRC. You as the reader can search up how to do that.</p>
 <h2>When things go wrong</h2>
 <p>Install <code>net-irc/weechat</code> or whatever IRC client that runs, connect to Libera
 by <code>irc.libera.chat:6697</code>, then ask for help on <code>#gentoo</code>.</p>

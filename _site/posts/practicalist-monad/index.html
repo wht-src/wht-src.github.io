@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Praticalist&#39;s Guide to Monads</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/prism-okaidia.css">
+</head>
+<body>
+    <main>
+        
+  <article>
+    <h1>Praticalist&#39;s Guide to Monads</h1>
+    <p class="post-meta">
+      <time datetime="2025-12-24">Dec 24, 2025</time>
+    </p>
+
+    <p>Every single Haskell blogger writes a monad explination. Usually it involves
+multiple white paper release, a degree in expert math and no code written.</p>
+<p>Personally, I think its a futile effort to understand what monads are in a
+mathamatical level. You see, you don't need math knowledge to know how to use
+a monad. In fact, using them is quite simple.</p>
+<p>In the following guide, we will use Scala for explination instead of Haskell. Why?
+Because its frankly a pain to explain Haskell syntax. We will use something
+more in line with what we are all familiar with: object oriented programming.</p>
+<h2>So, what is a monad?</h2>
+<p>Instead of bringing out the math book, lets look at monad as a trait (or
+abstract class) that implements some methods. Anything that implements
+the trait is a monad. In my opinion, the three most important parts of a monad
+is <code>pure</code>, <code>map</code> and <code>flatMap</code>. Usually there is a lot more helper methods
+but we don't care about them.</p>
+<pre class="language-scala"><code class="language-scala"><span class="token comment">// F[_] means a generic higher kind type, </span>
+<span class="token comment">// which is any type that stores a generic type </span>
+<span class="token comment">// for example List[Int]</span>
+<span class="token keyword">trait</span> Monad<span class="token punctuation">[</span>F<span class="token punctuation">[</span>_<span class="token punctuation">]</span><span class="token punctuation">]</span><span class="token operator">:</span>
+  <span class="token keyword">def</span> pure<span class="token punctuation">[</span>A<span class="token punctuation">]</span><span class="token punctuation">(</span>a<span class="token operator">:</span> A<span class="token punctuation">)</span><span class="token operator">:</span> F<span class="token punctuation">[</span>A<span class="token punctuation">]</span>
+  <span class="token comment">// A => F[B] means a function that takes A and returns F[B]</span>
+  <span class="token keyword">def</span> flatMap<span class="token punctuation">[</span>A<span class="token punctuation">,</span> B<span class="token punctuation">]</span><span class="token punctuation">(</span>fa<span class="token operator">:</span> F<span class="token punctuation">[</span>A<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">(</span>f<span class="token operator">:</span> A <span class="token keyword">=></span> F<span class="token punctuation">[</span>B<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> F<span class="token punctuation">[</span>B<span class="token punctuation">]</span>
+  <span class="token keyword">def</span> map<span class="token punctuation">[</span>A<span class="token punctuation">,</span> B<span class="token punctuation">]</span><span class="token punctuation">(</span>fa<span class="token operator">:</span> F<span class="token punctuation">[</span>A<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">(</span>f<span class="token operator">:</span> A <span class="token keyword">=></span> B<span class="token punctuation">)</span><span class="token operator">:</span> F<span class="token punctuation">[</span>B<span class="token punctuation">]</span> <span class="token operator">=</span>
+    flatMap<span class="token punctuation">(</span>fa<span class="token punctuation">)</span><span class="token punctuation">(</span>a <span class="token keyword">=></span> pure<span class="token punctuation">(</span>f<span class="token punctuation">(</span>a<span class="token punctuation">)</span><span class="token punctuation">)</span><span class="token punctuation">)</span></code></pre>
+<p>Don't worry if you don't understand what the generic types mean. Just
+know that a monad:</p>
+<ul>
+<li>Can be made with <code>pure(value)</code>, which returns a monad storing <code>value</code></li>
+<li>Can be <code>flatMap(fn)</code>ed, where the inner value of the monad is unwrapped and feed
+into <code>fn</code> (the <code>fn</code> returns a new monad). The return of the <code>fn</code> shall be the return
+of the <code>flatMap(fn)</code> itself.</li>
+<li>Can be <code>map(fn)</code>ed to apply the function <code>fn</code> to the value that the monad
+stores, the output of <code>fn</code> is wrapped back in the same monad and returned.</li>
+</ul>
+<p>By this point you should have realized it's just a container type that stores data.
+Why make it complicated?</p>
+<p>If you don't however, look at the following examples.</p>
+<h2>Example: identity</h2>
+<p>Let's take a look at the most simple monad out there, the identity:</p>
+<pre class="language-scala"><code class="language-scala"><span class="token comment">// just a simple container of a value</span>
+<span class="token keyword">case</span> <span class="token keyword">class</span> Id<span class="token punctuation">[</span>A<span class="token punctuation">]</span><span class="token punctuation">(</span>value<span class="token operator">:</span> A<span class="token punctuation">)</span>
+
+<span class="token keyword">object</span> Identity <span class="token keyword">extends</span> Monad<span class="token punctuation">[</span>Id<span class="token punctuation">]</span><span class="token operator">:</span>
+  <span class="token keyword">override</span> <span class="token keyword">def</span> pure<span class="token punctuation">[</span>A<span class="token punctuation">]</span><span class="token punctuation">(</span>a<span class="token operator">:</span> A<span class="token punctuation">)</span><span class="token operator">:</span> Id<span class="token punctuation">[</span>A<span class="token punctuation">]</span> <span class="token operator">=</span> Id<span class="token punctuation">(</span>a<span class="token punctuation">)</span>
+  <span class="token keyword">override</span> <span class="token keyword">def</span> flatMap<span class="token punctuation">[</span>A<span class="token punctuation">,</span> B<span class="token punctuation">]</span><span class="token punctuation">(</span>fa<span class="token operator">:</span> Id<span class="token punctuation">[</span>A<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">(</span>f<span class="token operator">:</span> A <span class="token keyword">=></span> Id<span class="token punctuation">[</span>B<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> Id<span class="token punctuation">[</span>B<span class="token punctuation">]</span> <span class="token operator">=</span>
+    f<span class="token punctuation">(</span>fa<span class="token punctuation">.</span>value<span class="token punctuation">)</span></code></pre>
+<p>Let's try using it:</p>
+<pre class="language-scala"><code class="language-scala"><span class="token keyword">def</span> double<span class="token punctuation">(</span>n<span class="token operator">:</span> <span class="token builtin">Int</span><span class="token punctuation">)</span> <span class="token operator">=</span> Id<span class="token punctuation">(</span>n <span class="token operator">*</span> <span class="token number">2</span><span class="token punctuation">)</span>
+
+<span class="token annotation punctuation">@main</span> <span class="token keyword">def</span> core<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span>
+  <span class="token keyword">val</span> a <span class="token operator">=</span> Identity<span class="token punctuation">.</span>pure<span class="token punctuation">(</span><span class="token number">12</span><span class="token punctuation">)</span> <span class="token comment">// Id(12)</span>
+  <span class="token keyword">val</span> b <span class="token operator">=</span> Identity<span class="token punctuation">.</span>map<span class="token punctuation">(</span>a<span class="token punctuation">)</span><span class="token punctuation">(</span>input <span class="token keyword">=></span> input <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token comment">// now Id(13)</span>
+  <span class="token keyword">val</span> c <span class="token operator">=</span> Identity<span class="token punctuation">.</span>flatMap<span class="token punctuation">(</span>b<span class="token punctuation">)</span><span class="token punctuation">(</span>double<span class="token punctuation">)</span> <span class="token comment">// now Id(26)</span></code></pre>
+<p>Also note that the identity monad is absolutely useless. You won't be using
+it to do anything than demonstrate the concept.</p>
+<p>Side note: many existing monad libaries allows you use this syntax to
+chain <code>map</code>s and <code>flatMap</code>s:</p>
+<pre class="language-scala"><code class="language-scala">Identity<span class="token punctuation">.</span>pure<span class="token punctuation">(</span><span class="token number">12</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span>map<span class="token punctuation">(</span>input <span class="token keyword">=></span> input <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span>flatMap<span class="token punctuation">(</span>double<span class="token punctuation">)</span></code></pre>
+<p>It requires more code to achieve so we are just going to stick with the
+boilerplate-y but simple implementation.</p>
+<h2>Example: option</h2>
+<p>Identity monads are useless, but option monads are not. Let's look at the<br>
+implementation first.</p>
+<pre class="language-scala"><code class="language-scala"><span class="token comment">// + means covariant, explaining it takes too much time so</span>
+<span class="token comment">// assume +T is just a simple generic type</span>
+<span class="token keyword">enum</span> Option<span class="token punctuation">[</span><span class="token operator">+</span>T<span class="token punctuation">]</span><span class="token operator">:</span>
+  <span class="token keyword">case</span> Some<span class="token punctuation">(</span>value<span class="token operator">:</span> T<span class="token punctuation">)</span>
+  <span class="token keyword">case</span> None
+
+<span class="token keyword">object</span> Opt <span class="token keyword">extends</span> Monad<span class="token punctuation">[</span>Option<span class="token punctuation">]</span><span class="token operator">:</span>
+  <span class="token keyword">override</span> <span class="token keyword">def</span> pure<span class="token punctuation">[</span>A<span class="token punctuation">]</span><span class="token punctuation">(</span>a<span class="token operator">:</span> A<span class="token punctuation">)</span><span class="token operator">:</span> Option<span class="token punctuation">[</span>A<span class="token punctuation">]</span> <span class="token operator">=</span> Option<span class="token punctuation">.</span>Some<span class="token punctuation">(</span>a<span class="token punctuation">)</span>
+  <span class="token keyword">override</span> <span class="token keyword">def</span> flatMap<span class="token punctuation">[</span>A<span class="token punctuation">,</span> B<span class="token punctuation">]</span><span class="token punctuation">(</span>fa<span class="token operator">:</span> Option<span class="token punctuation">[</span>A<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">(</span>f<span class="token operator">:</span> A <span class="token keyword">=></span> Option<span class="token punctuation">[</span>B<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token operator">:</span> Option<span class="token punctuation">[</span>B<span class="token punctuation">]</span> <span class="token operator">=</span>
+    fa <span class="token keyword">match</span>
+      <span class="token keyword">case</span> Option<span class="token punctuation">.</span>Some<span class="token punctuation">(</span>value<span class="token punctuation">)</span> <span class="token keyword">=></span>
+        f<span class="token punctuation">(</span>value<span class="token punctuation">)</span>
+      <span class="token keyword">case</span> Option<span class="token punctuation">.</span>None <span class="token keyword">=></span>
+        Option<span class="token punctuation">.</span>None</code></pre>
+<p>The gist is, in a chain of <code>map</code>s and <code>flatMap</code>s, whenever one link of the chain
+returns a <code>None</code>, the entire chain returns a <code>None</code>, just like an early return.
+You then handle the error.</p>
+<p>You can do it just like an identity monad:</p>
+<pre class="language-scala"><code class="language-scala"><span class="token keyword">def</span> double<span class="token punctuation">(</span>n<span class="token operator">:</span> <span class="token builtin">Int</span><span class="token punctuation">)</span> <span class="token operator">=</span> Option<span class="token punctuation">.</span>Some<span class="token punctuation">(</span>n <span class="token operator">*</span> <span class="token number">2</span><span class="token punctuation">)</span>
+
+<span class="token annotation punctuation">@main</span> <span class="token keyword">def</span> core<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span>
+  <span class="token keyword">val</span> a <span class="token operator">=</span> Opt<span class="token punctuation">.</span>pure<span class="token punctuation">(</span><span class="token number">12</span><span class="token punctuation">)</span>
+  <span class="token keyword">val</span> b <span class="token operator">=</span> Opt<span class="token punctuation">.</span>flatMap<span class="token punctuation">(</span>a<span class="token punctuation">)</span><span class="token punctuation">(</span>double<span class="token punctuation">)</span>
+  <span class="token keyword">val</span> c <span class="token operator">=</span> Opt<span class="token punctuation">.</span>map<span class="token punctuation">(</span>b<span class="token punctuation">)</span><span class="token punctuation">(</span>input <span class="token keyword">=></span> input <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token comment">// Some(25)</span></code></pre>
+<p>However, the power comes from when something goes wrong:</p>
+<pre class="language-scala"><code class="language-scala"><span class="token keyword">def</span> double<span class="token punctuation">(</span>n<span class="token operator">:</span> <span class="token builtin">Int</span><span class="token punctuation">)</span><span class="token operator">:</span> Option<span class="token punctuation">[</span><span class="token builtin">Int</span><span class="token punctuation">]</span> <span class="token operator">=</span> Option<span class="token punctuation">.</span>None
+
+<span class="token annotation punctuation">@main</span> <span class="token keyword">def</span> core<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span>
+  <span class="token keyword">val</span> a <span class="token operator">=</span> Opt<span class="token punctuation">.</span>pure<span class="token punctuation">(</span><span class="token number">12</span><span class="token punctuation">)</span>
+  <span class="token keyword">val</span> b <span class="token operator">=</span> Opt<span class="token punctuation">.</span>flatMap<span class="token punctuation">(</span>a<span class="token punctuation">)</span><span class="token punctuation">(</span>double<span class="token punctuation">)</span> <span class="token comment">// None</span>
+  <span class="token keyword">val</span> c <span class="token operator">=</span> Opt<span class="token punctuation">.</span>map<span class="token punctuation">(</span>b<span class="token punctuation">)</span><span class="token punctuation">(</span>input <span class="token keyword">=></span> input <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span> <span class="token comment">// None</span></code></pre>
+<p>Let's look at a pratical usecase. Supppose you are
+writing a server in functional programming style.</p>
+<ol>
+<li>The client send you some api calls.</li>
+<li>You extract the body field of the request,</li>
+<li>you look up the username in the body by querying a database</li>
+<li>You send the user's public info back to the client.</li>
+</ol>
+<p>Notice how the middle 2 steps may yield you a <code>nil</code>. You can't pass <code>nil</code>
+to another function, so you are either going to do an early return
+(functional programming doesn't allow that) or you add tons of boilerplate
+error handling functions.</p>
+<p>Instead of setting your hair on fire, we can use option monads.</p>
+<pre class="language-scala"><code class="language-scala"><span class="token keyword">def</span> getBody<span class="token punctuation">(</span>req<span class="token operator">:</span> Request<span class="token punctuation">)</span><span class="token operator">:</span> Option<span class="token punctuation">[</span>Body<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token keyword">def</span> getUser<span class="token punctuation">(</span>username<span class="token operator">:</span> <span class="token builtin">String</span><span class="token punctuation">)</span><span class="token operator">:</span> Option<span class="token punctuation">[</span>User<span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+
+<span class="token comment">// assuming we already implmeneted the chain syntax thing</span>
+Handler<span class="token punctuation">.</span>onReq<span class="token punctuation">(</span>req <span class="token keyword">=></span>
+  <span class="token keyword">val</span> result <span class="token operator">=</span> Opt<span class="token punctuation">.</span>pure<span class="token punctuation">(</span>req<span class="token punctuation">)</span>
+    <span class="token punctuation">.</span>flatMap<span class="token punctuation">(</span>getBody<span class="token punctuation">)</span>
+    <span class="token punctuation">.</span>flatMap<span class="token punctuation">(</span>getUser<span class="token punctuation">)</span>
+
+  result <span class="token keyword">match</span> 
+    <span class="token keyword">case</span> Option<span class="token punctuation">.</span>Some<span class="token punctuation">(</span>value<span class="token punctuation">)</span> <span class="token keyword">=></span>
+      OKResponse<span class="token punctuation">(</span>userInfo <span class="token operator">=</span> value<span class="token punctuation">)</span>
+    <span class="token keyword">case</span> Option<span class="token punctuation">.</span>None <span class="token keyword">=></span>
+      FailResponse<span class="token punctuation">(</span><span class="token string">"body or username does not exist"</span><span class="token punctuation">)</span>
+<span class="token punctuation">)</span></code></pre>
+<p>Sometimes when you want to inject error information into
+an option monad, you can also use an result monad.</p>
+<pre class="language-scala"><code class="language-scala"><span class="token keyword">enum</span> Result<span class="token punctuation">[</span><span class="token operator">+</span>T<span class="token punctuation">,</span> <span class="token operator">+</span>E<span class="token punctuation">]</span><span class="token operator">:</span>
+  <span class="token keyword">case</span> Ok<span class="token punctuation">(</span>value<span class="token operator">:</span> T<span class="token punctuation">)</span>
+  <span class="token keyword">case</span> Err<span class="token punctuation">(</span>err<span class="token operator">:</span> E<span class="token punctuation">)</span>
+
+<span class="token comment">// insert monad implementation</span></code></pre>
+<p>This one works the same way as an option monad, when a link
+in the <code>map</code> &amp; <code>flatMap</code> chain returns an <code>Err</code>, the entire chain returns
+said <code>Err</code> and you can now extract the error info from
+the <code>Err</code> thing and do error handling.</p>
+<h2>Finale: IO</h2>
+<p>We have talked about the normal use of monads, now let's look at
+something that is quite different: IO monads.</p>
+<p>For those who wants completely pure functional programming, IO monads
+are used to achieve side effects in a pure codebase (IO operations like
+printing lines or querying an external database). How do we do that?</p>
+<p>Unfortunately, we won't implement IO monads here, they are too complex
+to write in a guide like this, so just assume we implemented it.</p>
+<p>Of course, you can use it like an identity monad:</p>
+<pre class="language-scala"><code class="language-scala"><span class="token keyword">def</span> double<span class="token punctuation">(</span>a<span class="token operator">:</span> <span class="token builtin">Int</span><span class="token punctuation">)</span> <span class="token operator">=</span> IO<span class="token punctuation">.</span>pure<span class="token punctuation">(</span>a <span class="token operator">*</span> <span class="token number">2</span><span class="token punctuation">)</span>
+
+IO<span class="token punctuation">.</span>pure<span class="token punctuation">(</span><span class="token number">12</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span>map<span class="token punctuation">(</span>input <span class="token keyword">=></span> input <span class="token operator">+</span> <span class="token number">1</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span>flatMap<span class="token punctuation">(</span>double<span class="token punctuation">)</span> <span class="token comment">// IO(26)</span></code></pre>
+<p>But it can also be used like this:</p>
+<pre class="language-scala"><code class="language-scala"><span class="token keyword">def</span> queryDB<span class="token punctuation">(</span>query<span class="token operator">:</span> Query<span class="token punctuation">)</span><span class="token operator">:</span> IO<span class="token punctuation">[</span><span class="token builtin">String</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+<span class="token keyword">def</span> printLn<span class="token punctuation">(</span>msg<span class="token operator">:</span> <span class="token builtin">String</span><span class="token punctuation">)</span><span class="token operator">:</span> IO<span class="token punctuation">[</span><span class="token builtin">Unit</span><span class="token punctuation">]</span> <span class="token operator">=</span> <span class="token punctuation">.</span><span class="token punctuation">.</span><span class="token punctuation">.</span>
+
+IO<span class="token punctuation">.</span>pure<span class="token punctuation">(</span><span class="token string">"John"</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span>map<span class="token punctuation">(</span>a <span class="token keyword">=></span> Query<span class="token punctuation">(</span>username <span class="token operator">=</span> a<span class="token punctuation">)</span><span class="token punctuation">)</span>
+  <span class="token punctuation">.</span>flatMap<span class="token punctuation">(</span>queryDB<span class="token punctuation">)</span>
+  <span class="token punctuation">.</span>flatMap<span class="token punctuation">(</span>printLn<span class="token punctuation">)</span> <span class="token comment">// IO[Unit]</span></code></pre>
+<p>The intention of this code snippet is quite simple: we first make a IO
+monad storing <code>&quot;John&quot;</code>, then we turn <code>&quot;John&quot;</code> into a <code>Query</code>, we then
+feed <code>Query</code> into <code>queryDB</code>, and finally we print the return of the
+query.</p>
+<p>Note that instead of doing anything, it returns an <code>IO[Unit]</code>. The
+<code>IO[Unit]</code> does nothing, but it stores crucial informations that
+routhly goes like this:</p>
+<ol>
+<li>Start as <code>&quot;John&quot;</code></li>
+<li>Turn it into a <code>Query</code></li>
+<li>Perform side effect of querying the database</li>
+<li>Print the result of the query</li>
+</ol>
+<p>As you can see, it stores the instructions on what the computer should do.</p>
+<p>Then the <code>IO[Unit]</code> gets returned from the main function and ran by the
+runtime. So the gist is, instead of doing the side effect immediately,
+your &quot;&quot;&quot;pure&quot;&quot;&quot; codebase is just constructing a long step by step instruction
+telling the computer what it should do, then returning it to the runtime so the
+stuff actually gets ran. It is pure because you never ever did any side effect,
+all you do is construct data (in this case the step by step instructions)
+and return the data. (The runtime is of course not pure, in a way doing the
+pure functional programming is just lying to yourself that your code is pure,
+it never is)</p>
+<h2>Epilogue</h2>
+<p>Hope this helps with understanding how to use a monad. Now I will disappear to
+hide from the angry Haskell users out there trying to get me. Good luck and enjoy
+your now &quot;&quot;&quot;pure&quot;&quot;&quot; and monad filled codebase.</p>
+
+  </article>
+
+  <p><a href="/">Back to Home</a></p>
+
+    </main>
+</body>
+</html>
