@@ -114,7 +114,7 @@ The gist is, in a chain of `map`s and `flatMap`s, whenever one link of the chain
 returns a `None`, the entire chain returns a `None`, just like an early return. 
 You then handle the error.
 
-You can do it just like an identity monad:
+You can use it just like an identity monad:
 ```scala
 def double(n: Int) = Option.Some(n * 2)
 

@@ -97,7 +97,7 @@ implementation first.</p>
 <p>The gist is, in a chain of <code>map</code>s and <code>flatMap</code>s, whenever one link of the chain
 returns a <code>None</code>, the entire chain returns a <code>None</code>, just like an early return.
 You then handle the error.</p>
-<p>You can do it just like an identity monad:</p>
+<p>You can use it just like an identity monad:</p>
 <pre class="language-scala"><code class="language-scala"><span class="token keyword">def</span> double<span class="token punctuation">(</span>n<span class="token operator">:</span> <span class="token builtin">Int</span><span class="token punctuation">)</span> <span class="token operator">=</span> Option<span class="token punctuation">.</span>Some<span class="token punctuation">(</span>n <span class="token operator">*</span> <span class="token number">2</span><span class="token punctuation">)</span>
 
 <span class="token annotation punctuation">@main</span> <span class="token keyword">def</span> core<span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=</span>
