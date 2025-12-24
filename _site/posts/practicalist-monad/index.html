@@ -172,7 +172,7 @@ IO<span class="token punctuation">.</span>pure<span class="token punctuation">(<
   <span class="token punctuation">.</span>map<span class="token punctuation">(</span>a <span class="token keyword">=></span> Query<span class="token punctuation">(</span>username <span class="token operator">=</span> a<span class="token punctuation">)</span><span class="token punctuation">)</span>
   <span class="token punctuation">.</span>flatMap<span class="token punctuation">(</span>queryDB<span class="token punctuation">)</span>
   <span class="token punctuation">.</span>flatMap<span class="token punctuation">(</span>printLn<span class="token punctuation">)</span> <span class="token comment">// IO[Unit]</span></code></pre>
-<p>The intention of this code snippet is quite simple: we first make a IO
+<p>The intention of this code snippet is quite simple: we first make an IO
 monad storing <code>&quot;John&quot;</code>, then we turn <code>&quot;John&quot;</code> into a <code>Query</code>, we then
 feed <code>Query</code> into <code>queryDB</code>, and finally we print the return of the
 query.</p>

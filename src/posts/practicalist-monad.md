@@ -213,7 +213,7 @@ IO.pure("John")
   .flatMap(printLn) // IO[Unit]
 ```
 
-The intention of this code snippet is quite simple: we first make a IO
+The intention of this code snippet is quite simple: we first make an IO
 monad storing `"John"`, then we turn `"John"` into a `Query`, we then 
 feed `Query` into `queryDB`, and finally we print the return of the 
 query.
