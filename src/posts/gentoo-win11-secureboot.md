@@ -257,6 +257,22 @@ Side note, dual boot may cause time desync between 2 systems. In Linux SystemD y
 run `timedatectl set-local-rtc 1` with root permissions to fix it. The OpenRC fix is 
 much more annoying, plus I don't use OpenRC. You as the reader can search up how to do that.
 
+## Updating GRUB 
+
+Sometime Gentoo dishes out a GRUB update. After the emerge is done, do the following:
+```bash
+grub-install --efi-directory=/efi
+
+cp /usr/share/shim/BOOTX64.EFI /efi/EFI/Gentoo/shimx64.efi
+cp /usr/share/shim/mmx64.efi /efi/EFI/Gentoo/mmx64.efi
+cp /usr/lib/grub/grub-x86_64.efi.signed /efi/EFI/Gentoo/grubx64.efi
+
+# goes without saying change the disk and the partition id
+efibootmgr --create --disk /dev/nvme0n1 -disk --part 1 --loader '\EFI\Gentoo\shimx64.efi' --label 'GRUB via Shim' --unicode
+
+grub-mkconfig -o /efi/EFI/Gentoo/grub.cfg
+```
+
 ## When things go wrong 
 
 Install `net-irc/weechat` or whatever IRC client that runs, connect to Libera 
