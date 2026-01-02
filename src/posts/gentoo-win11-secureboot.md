@@ -211,7 +211,7 @@ cp /usr/lib/grub/grub-x86_64.efi.signed /efi/EFI/Gentoo/grubx64.efi
 # replace /dev/nvme0n1 with your boot disk 
 # replace the number 1 in --part 1 with the boot partition id, should just be 1 because 
 # our efi partition is /dev/nvme0n1p1
-efibootmgr --create --disk /dev/nvme0n1 -disk --part 1 --loader '\EFI\Gentoo\shimx64.efi' --label 'GRUB via Shim' --unicode
+efibootmgr --create --disk /dev/nvme0n1 --part 1 --loader '\EFI\Gentoo\shimx64.efi' --label 'GRUB via Shim' --unicode
 
 # install the kernel
 emerge -a sys-kernel/gentoo-kernel-bin
@@ -268,7 +268,7 @@ cp /usr/share/shim/mmx64.efi /efi/EFI/Gentoo/mmx64.efi
 cp /usr/lib/grub/grub-x86_64.efi.signed /efi/EFI/Gentoo/grubx64.efi
 
 # goes without saying change the disk and the partition id
-efibootmgr --create --disk /dev/nvme0n1 -disk --part 1 --loader '\EFI\Gentoo\shimx64.efi' --label 'GRUB via Shim' --unicode
+efibootmgr --create --disk /dev/nvme0n1 --part 1 --loader '\EFI\Gentoo\shimx64.efi' --label 'GRUB via Shim' --unicode
 
 grub-mkconfig -o /efi/EFI/Gentoo/grub.cfg
 ```
