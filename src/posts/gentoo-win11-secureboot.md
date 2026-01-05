@@ -263,8 +263,6 @@ Sometime Gentoo dishes out a GRUB update. After the emerge is done, do the follo
 ```bash
 grub-install --efi-directory=/efi
 
-cp /usr/share/shim/BOOTX64.EFI /efi/EFI/Gentoo/shimx64.efi
-cp /usr/share/shim/mmx64.efi /efi/EFI/Gentoo/mmx64.efi
 cp /usr/lib/grub/grub-x86_64.efi.signed /efi/EFI/Gentoo/grubx64.efi
 
 # goes without saying change the disk and the partition id

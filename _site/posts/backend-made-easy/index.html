@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend Made Easy</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/prism-okaidia.css">
+</head>
+<body>
+    <main>
+        
+  <article>
+    <h1>Backend Made Easy</h1>
+    <p class="post-meta">
+      <time datetime="2025-12-26">Dec 26, 2025</time>
+    </p>
+
+    <p>Over the years, I've seen a lot of new developers telling me that they
+don't want to do server backend. The reason? It's complex. It's only
+natural. Look at popular frameworks like ASP.NET, the starting point
+involves tons of files that are frankly intimidating. Even beloved
+frameworks like Phoenix generates tons of files. Of course, I'm not saying
+that it's necessarily a bad thing to have tons of files pre-generated for
+a project. All of these files mean something, but to a beginner? Maximized
+intimidation.</p>
+<p>I'm sure these frameworks work nicely for large companies with thousands of
+users every second, but have you ever considered that a beginner doesn't really
+need all that extra addons, and they only serve to intimidate? We can do
+better than that.</p>
+<p>This is where Clojure comes into play. Clojure likes to be simple, and it shows that
+in how the community does things. Instead of making a raw framework and throwing
+everything at the programmer at once, we just stack libaries on demand. This way,
+you know exactly what each part of your codebase does, allowing you to make the
+website of your dreams without setting your hair on fire.</p>
+<p>This guide serves to get your feet wet in making web backends. I assume you already
+know a bit of programming. You should also know the basics of Clojure. If not, look at
+<a href="https://clojure.org/guides/learn/clojure">this</a>. Don't worry, there are only 6 chapters
+and each chapter is very short. After all, Clojure is a very simple language.</p>
+<p>You will also need to install Clojure, specifics <a href="https://clojure.org/guides/install_clojure">here</a>.</p>
+<h1>The overview</h1>
+<p>For the unaware, writing a server backend seems complex. But its actually quite simple.
+Unless you are writing the entire thing in a low level language like C, the modern
+abstractions makes your backend looks like the following:</p>
+<blockquote>
+<p>Receive request -&gt; Process request -&gt; Generate Response -&gt; Send it back to the client</p>
+</blockquote>
+<p>It's quite simple, isn't it.</p>
+<p>In this guide, we will be making a really really simple todo list backend.</p>
+<h1>Making the project</h1>
+<p>Let's first get the skeleton of the project made.</p>
+<p>Create an empty directory. Let's name it backend. This name does
+not matter. Cd into it. We will call this directory the root
+directory.</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">mkdir</span> backend
+<span class="token builtin class-name">cd</span> backend</code></pre>
+<p>Inside the directory, make another directory named <code>src</code>, after that
+make a file named <code>deps.edn</code> and paste in the following:</p>
+<pre class="language-clojure"><code class="language-clojure"><span class="token punctuation">{</span><span class="token symbol">:paths</span> <span class="token punctuation">[</span><span class="token string">"src"</span><span class="token punctuation">]</span>
+ <span class="token symbol">:deps</span> <span class="token punctuation">{</span>org.clojure/clojure <span class="token punctuation">{</span><span class="token symbol">:mvn/version</span> <span class="token string">"1.12.4"</span><span class="token punctuation">}</span><span class="token punctuation">}</span><span class="token punctuation">}</span></code></pre>
+<p>This tells Clojure that it uses the <code>1.12.4</code> version of the language,
+and Clojure should scan the path <code>src</code> for source code.</p>
+<p>In <code>src</code> directory, make another directory named <code>backend</code>. This will
+be the name of the project. In said directory, make a file named
+<code>core.clj</code>. It will be the entry point to our program. Paste in the following:</p>
+<pre class="language-clojure"><code class="language-clojure"><span class="token punctuation">(</span><span class="token keyword">ns</span> backend.core<span class="token punctuation">)</span>
+
+<span class="token punctuation">(</span><span class="token keyword">defn</span> -main <span class="token punctuation">[</span><span class="token punctuation">]</span>
+  <span class="token punctuation">(</span><span class="token keyword">println</span> <span class="token string">"hello world"</span><span class="token punctuation">)</span><span class="token punctuation">)</span></code></pre>
+<p>Now run your source code. <code>cd</code> back to the root directory. Run the following
+command to execute your program. Next time when I ask you to run the program,
+do the following:</p>
+<pre class="language-bash"><code class="language-bash">clj <span class="token parameter variable">-M</span> <span class="token parameter variable">-m</span> backend.core
+
+<span class="token comment"># should print hello world</span></code></pre>
+<p>The preparation is done.</p>
+<h2>Receiving and sending requests</h2>
+<p>Recall the overview. To deal make a backend, we first need to receive requests.
+How do we do that?</p>
+<p>Edit <code>deps.edn</code>, change the file so that it looks like the following:</p>
+<pre class="language-clojure"><code class="language-clojure"><span class="token punctuation">{</span><span class="token symbol">:paths</span> <span class="token punctuation">[</span><span class="token string">"src"</span><span class="token punctuation">]</span>
+   <span class="token symbol">:deps</span> <span class="token punctuation">{</span>org.clojure/clojure <span class="token punctuation">{</span><span class="token symbol">:mvn/version</span> <span class="token string">"1.12.4"</span><span class="token punctuation">}</span>
+          http-kit/http-kit <span class="token punctuation">{</span><span class="token symbol">:mvn/version</span> <span class="token string">"2.8.1"</span><span class="token punctuation">}</span><span class="token punctuation">}</span><span class="token punctuation">}</span>
+</code></pre>
+<p>This will tell Clojure we want to install the <code>http-kit</code> library of version <code>2.8.1</code>.
+This library contains code that allows us to recieve request and send responses
+back to the client.</p>
+<p>Now in <code>core.clj</code>, change it to the following:</p>
+<pre class="language-clojure"><code class="language-clojure"><span class="token punctuation">(</span><span class="token keyword">ns</span> backend.core
+  <span class="token punctuation">(</span><span class="token symbol">:require</span> <span class="token punctuation">[</span>org.httpkit.server <span class="token symbol">:as</span> hk-server<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment">; tell clojure we want to use httpkit server</span>
+
+<span class="token punctuation">(</span><span class="token keyword">defn</span> app <span class="token punctuation">[</span>req<span class="token punctuation">]</span> 
+  <span class="token punctuation">{</span><span class="token symbol">:status</span>  <span class="token number">200</span>
+   <span class="token symbol">:body</span>    <span class="token string">"hello world"</span><span class="token punctuation">}</span><span class="token punctuation">)</span>
+
+<span class="token comment">; the status field of a http request is quite simple, different numbers corresponds to </span>
+<span class="token comment">; different statuses, 200 means OK and famously 404 means not found</span>
+
+<span class="token punctuation">(</span><span class="token keyword">defn</span> -main <span class="token punctuation">[</span><span class="token punctuation">]</span>
+  <span class="token punctuation">(</span><span class="token function">hk-server/run-server</span> app <span class="token punctuation">{</span><span class="token symbol">:port</span> <span class="token number">8000</span><span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">)</span> <span class="token comment">; we pass the function app to the run-server command </span>
+  <span class="token comment">; this input of the function will be the user's request formatted into a map,</span>
+  <span class="token comment">; the return of the function will be send back to the user</span></code></pre>
+<p>Run the program and try it out! In another terminal, run:</p>
+<pre class="language-bash"><code class="language-bash"><span class="token function">curl</span> localhost:8000</code></pre>
+<p>It should output <code>hello world</code>.</p>
+<p>As you can see, in just 9 lines of code, you have already made something that
+can send stuff to the client. Quite simple, isn't it.</p>
+<h2>Mapping out the requests</h2>
+
+  </article>
+
+  <p><a href="/">Back to Home</a></p>
+
+    </main>
+</body>
+</html>
