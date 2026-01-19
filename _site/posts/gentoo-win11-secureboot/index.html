@@ -171,7 +171,7 @@ append the line if it doesn't exist.</p>
 <span class="token comment"># replace /dev/nvme0n1 with your boot disk </span>
 <span class="token comment"># replace the number 1 in --part 1 with the boot partition id, should just be 1 because </span>
 <span class="token comment"># our efi partition is /dev/nvme0n1p1</span>
-efibootmgr <span class="token parameter variable">--create</span> <span class="token parameter variable">--disk</span> /dev/nvme0n1 <span class="token parameter variable">-disk</span> <span class="token parameter variable">--part</span> <span class="token number">1</span> <span class="token parameter variable">--loader</span> <span class="token string">'\EFI\Gentoo\shimx64.efi'</span> <span class="token parameter variable">--label</span> <span class="token string">'GRUB via Shim'</span> <span class="token parameter variable">--unicode</span>
+efibootmgr <span class="token parameter variable">--create</span> <span class="token parameter variable">--disk</span> /dev/nvme0n1 <span class="token parameter variable">--part</span> <span class="token number">1</span> <span class="token parameter variable">--loader</span> <span class="token string">'\EFI\Gentoo\shimx64.efi'</span> <span class="token parameter variable">--label</span> <span class="token string">'GRUB via Shim'</span> <span class="token parameter variable">--unicode</span>
 
 <span class="token comment"># install the kernel</span>
 emerge <span class="token parameter variable">-a</span> sys-kernel/gentoo-kernel-bin
@@ -205,6 +205,16 @@ and occationally use your box to write code or do Linux things in general.</p>
 <p>Side note, dual boot may cause time desync between 2 systems. In Linux SystemD you can
 run <code>timedatectl set-local-rtc 1</code> with root permissions to fix it. The OpenRC fix is
 much more annoying, plus I don't use OpenRC. You as the reader can search up how to do that.</p>
+<h2>Updating GRUB</h2>
+<p>Sometime Gentoo dishes out a GRUB update. After the emerge is done, do the following:</p>
+<pre class="language-bash"><code class="language-bash">grub-install --efi-directory<span class="token operator">=</span>/efi
+
+<span class="token function">cp</span> /usr/lib/grub/grub-x86_64.efi.signed /efi/EFI/Gentoo/grubx64.efi
+
+<span class="token comment"># goes without saying change the disk and the partition id</span>
+efibootmgr <span class="token parameter variable">--create</span> <span class="token parameter variable">--disk</span> /dev/nvme0n1 <span class="token parameter variable">--part</span> <span class="token number">1</span> <span class="token parameter variable">--loader</span> <span class="token string">'\EFI\Gentoo\shimx64.efi'</span> <span class="token parameter variable">--label</span> <span class="token string">'GRUB via Shim'</span> <span class="token parameter variable">--unicode</span>
+
+<span class="token function">grub-mkconfig</span> <span class="token parameter variable">-o</span> /efi/EFI/Gentoo/grub.cfg</code></pre>
 <h2>When things go wrong</h2>
 <p>Install <code>net-irc/weechat</code> or whatever IRC client that runs, connect to Libera
 by <code>irc.libera.chat:6697</code>, then ask for help on <code>#gentoo</code>.</p>

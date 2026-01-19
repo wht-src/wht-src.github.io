@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Compiling C/C++ on Windows Made Easy</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/prism-okaidia.css">
+</head>
+<body>
+    <main>
+        
+  <article>
+    <h1>Compiling C/C++ on Windows Made Easy</h1>
+    <p class="post-meta">
+      <time datetime="2026-01-19">Jan 19, 2026</time>
+    </p>
+
+    <p>You know how it is, installing something like <code>clang++</code> or <code>gcc</code> on Windows
+is somewhat like setting your hair on fire. It doesn't have to be like that.</p>
+<p>Note that all the commands in this guide should be ran in <code>powershell</code>.</p>
+<h2>Install</h2>
+<p>A package manager will automatically install the things for us. In this case,
+let's use the scoop package manager. Open powershell and run these two commands.</p>
+<pre class="language-powershell"><code class="language-powershell"><span class="token function">Set-ExecutionPolicy</span> <span class="token operator">-</span>ExecutionPolicy RemoteSigned <span class="token operator">-</span>Scope CurrentUser
+<span class="token function">Invoke-RestMethod</span> <span class="token operator">-</span>Uri https:<span class="token operator">/</span><span class="token operator">/</span>get<span class="token punctuation">.</span>scoop<span class="token punctuation">.</span>sh <span class="token punctuation">|</span> <span class="token function">Invoke-Expression</span></code></pre>
+<p>After it is done, let's install the compiler. For starters, I recommend only
+getting <code>gcc/mingw</code>.</p>
+<pre class="language-powershell"><code class="language-powershell">scoop install mingw <span class="token comment"># gcc </span>
+scoop install llvm <span class="token comment"># clang</span></code></pre>
+<h2>LLVM Instructions</h2>
+<p>Skip this step if you have not run <code>scoop install llvm</code>.</p>
+<p>For <code>clang</code>, you will need to install more things. Go <a href="https://visualstudio.microsoft.com/downloads/">here</a>
+then scroll down to the <code>All Downloads</code> section. Click <code>Tools for Visual Studio</code>.
+Download <code>Build Tools for Visual Studio 2026</code>.</p>
+<p>When installing the build tools, make sure to select <code>Desktop development with C++</code>,
+after that, click <code>Install</code>. Wait for it to finish. After that, reboot your
+computer just to make sure, and you should be golden.</p>
+<h2>Testing the Installations</h2>
+<p>Just to make sure, let's see if it works:</p>
+<pre class="language-cpp"><code class="language-cpp"><span class="token macro property"><span class="token directive-hash">#</span><span class="token directive keyword">include</span> <span class="token string">&lt;iostream></span></span>
+<span class="token keyword">using</span> <span class="token keyword">namespace</span> std<span class="token punctuation">;</span>
+
+<span class="token keyword">int</span> <span class="token function">main</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    cout <span class="token operator">&lt;&lt;</span> <span class="token string">"goodbye world"</span> <span class="token operator">&lt;&lt;</span> endl<span class="token punctuation">;</span>
+    <span class="token keyword">return</span> <span class="token number">0</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span></code></pre>
+<p>Save it as <code>main.cpp</code> and figure out the location where you saved it. In
+my case it is <code>C:\Users\User\Documents\Projects\ctest\main.cpp</code>.</p>
+<blockquote>
+<p>for notepad users, when saving, you should select the option <code>All files (*.*)</code>
+for <code>Save as type</code> or else your code will be saved as <code>main.cpp.txt</code>, which
+will probably confuse your compiler</p>
+</blockquote>
+<p>Now, go to the folder where the code is saved, and compile.</p>
+<pre class="language-powershell"><code class="language-powershell">cd C:\Users\User\Documents\Projects\ctest
+
+clang+<span class="token operator">+</span> main<span class="token punctuation">.</span><span class="token function">cpp</span> <span class="token comment"># clang</span>
+g+<span class="token operator">+</span> main<span class="token punctuation">.</span><span class="token function">cpp</span> <span class="token comment"># gcc</span></code></pre>
+<p>The compiler should generate an <code>a.exe</code> file in the directory.
+Run <code>ls</code> to see what files are in the directory.</p>
+<pre class="language-powershell"><code class="language-powershell"><span class="token function">ls</span> 
+<span class="token comment"># main.cpp </span>
+<span class="token comment"># a.out</span></code></pre>
+<p>Finally, run em:</p>
+<pre class="language-powershell"><code class="language-powershell"><span class="token punctuation">.</span>\a<span class="token punctuation">.</span>exe
+<span class="token comment"># goodbye world</span></code></pre>
+<p>Congrats, you have now installed a C/C++ compiler in Windows.</p>
+
+  </article>
+
+  <p><a href="/">Back to Home</a></p>
+
+    </main>
+</body>
+</html>
