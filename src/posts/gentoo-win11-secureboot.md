@@ -1,5 +1,5 @@
 ---
-title: "Duel booting Gentoo and Windows 11 with Secure Boot"
+title: "Dual booting Gentoo and Windows 11 with Secure Boot"
 date: 2025-12-23
 tags: 
   - posts
@@ -9,7 +9,7 @@ layout: post.njk
 Supposed you as a Linux user wants to play some Battlefield 6. Won't run 
 on linux. You know, or whatever game that requires that TPM2.0 plus secureboot. 
 Clearly a VM won't cut it at this rate, and you still want Gentoo, so whats left 
-for you is duel booting (or WSL, we don't talk about WSL). Then you ask yourself, 
+for you is dual booting (or WSL, we don't talk about WSL). Then you ask yourself, 
 how do I do that? 
 
 In this guide, we will be installing Gentoo with the following layout:
@@ -250,7 +250,7 @@ Enter UEFI settings and turn secure boot on.
 Pray that you boot into the the grub menu. 
 Pray that grub boots your kernel.
 
-If nothing goes wrong, enjoy Gentoo and Windows duel boot. Now you can play Battlefield 6 
+If nothing goes wrong, enjoy Gentoo and Windows dual boot. Now you can play Battlefield 6 
 and occationally use your box to write code or do Linux things in general.
 
 Side note, dual boot may cause time desync between 2 systems. In Linux SystemD you can 
