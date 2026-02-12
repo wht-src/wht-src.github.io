@@ -74,6 +74,8 @@ clang++ main.cpp
 # if you installed gcc / mingw
 g++ main.cpp # gcc
 ```
+If nothing went wrong, then these two commands should print absolutely **nothing**.
+They will only output something when there are errors.
 
 The compiler should generate an `a.exe` file in the directory.
 Run `ls` to see what files are in the directory.
