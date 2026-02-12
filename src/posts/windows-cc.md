@@ -6,10 +6,11 @@ tags:
 layout: post.njk
 ---
 
-You know how it is, installing something like `clang++` or `gcc` on Windows 
+You know how it is, compiling c++ or c codebase on Windows 
 is somewhat like setting your hair on fire. It doesn't have to be like that.
 
-Note that all the commands in this guide should be ran in `powershell`.
+Note that all the commands in this guide should be ran in `powershell`. Press 
+the Windows to open up search menu, and search `powershell`, then open it.
 
 ## Install
 
@@ -20,11 +21,15 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
 ```
 
-After it is done, let's install the compiler. For starters, I recommend only 
-getting `gcc/mingw`.
+After it is done, let's install the compiler. We have 2 compiler options, both 
+can do basically the same thing, so you would only need to run one of the commands.
+For beginners, i recommend only installing `gcc`. You can also install both.
 ```powershell
-scoop install mingw # gcc 
-scoop install llvm # clang
+# install gcc, which gives you the command gcc to compile c code, and g++ to compile c++ code
+scoop install mingw 
+
+# install clang, which gives you the command clang to compile c code, and clang++ to compile c++ code
+scoop install llvm
 ```
 
 ## LLVM Instructions
@@ -55,11 +60,18 @@ my case it is `C:\Users\User\Documents\Projects\ctest\main.cpp`.
     for `Save as type` or else your code will be saved as `main.cpp.txt`, which 
     will probably confuse your compiler
 
-Now, go to the folder where the code is saved, and compile.
+Now, go to the folder where the code is saved.
 ```powershell
 cd C:\Users\User\Documents\Projects\ctest
+```
 
-clang++ main.cpp # clang
+After that, run either one of the command depending on which compiler 
+you have installed:
+```powershell
+# if you installed clang / llvm
+clang++ main.cpp 
+
+# if you installed gcc / mingw
 g++ main.cpp # gcc
 ```
 
