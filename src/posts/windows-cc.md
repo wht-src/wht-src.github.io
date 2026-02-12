@@ -10,7 +10,8 @@ You know how it is, compiling c++ or c codebase on Windows
 is somewhat like setting your hair on fire. It doesn't have to be like that.
 
 Note that all the commands in this guide should be ran in `powershell`. Press 
-the Windows to open up search menu, and search `powershell`, then open it.
+the `Windows` button on your keyboard to open up search menu, and search 
+`powershell`, then open it.
 
 ## Install
 
