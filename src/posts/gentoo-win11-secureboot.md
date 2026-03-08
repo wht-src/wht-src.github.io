@@ -19,11 +19,17 @@ In this guide, we will be installing Gentoo with the following layout:
 - one efi partition, already created by windows
 - you use UEFI (duh)
 - recommended: you have already installed Gentoo before and knows the gist of installation, 
-knows how to install package with `emerge` and knows the basics of tweaking `make.conf`
+knows how to install package with `emerge` and knows the basics of tweaking `make.conf`,
+not a hard requirement but it will make the process smoother
+
+Side note: whenever I ask you to install something, do the following:
+```bash
+emerge -a packagename
+```
+Where the package name may be something like `sys-boot/shim`.
 
 This guide is quick and dirty, if you want explinations on what these commands means,
 look it up with a search engine.
-
 
 ## Install Windows 
 
@@ -163,7 +169,7 @@ uefi_secureboot_key="/root/secureboot/MOK.key"
 
 Following that, install `sys-kernel/linux-firmware` and the microcode of your choice.
 
-Install the secure boot utilities of `sys-boot/shim sys-boot/mokutil sys-boot/efibootmgr`.
+Install the secure boot utilities of `sys-boot/mokutil sys-boot/efibootmgr`.
 
 Make/edit `/etc/env.d/99grub`, add the line:
 ```bash
@@ -204,6 +210,8 @@ append the line if it doesn't exist.
 
 Run the following:
 ```bash
+emerge -a sys-boot/shim
+
 cp /usr/share/shim/BOOTX64.EFI /efi/EFI/Gentoo/shimx64.efi
 cp /usr/share/shim/mmx64.efi /efi/EFI/Gentoo/mmx64.efi
 cp /usr/lib/grub/grub-x86_64.efi.signed /efi/EFI/Gentoo/grubx64.efi
