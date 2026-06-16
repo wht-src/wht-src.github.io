@@ -201,6 +201,10 @@ Now import the keys:
 
 mokutil --ignore-keyring --import /root/secureboot/MOK.der
 # replace the version with your kernel version
+
+# install the kernel
+emerge -a sys-kernel/gentoo-kernel-bin
+
 mokutil --ignore-keyring --import /usr/src/linux-6.12.58-gentoo-dist/certs/signing_key.x509
 ```
 
@@ -221,7 +225,7 @@ cp /usr/lib/grub/grub-x86_64.efi.signed /efi/EFI/Gentoo/grubx64.efi
 # our efi partition is /dev/nvme0n1p1
 efibootmgr --create --disk /dev/nvme0n1 --part 1 --loader '\EFI\Gentoo\shimx64.efi' --label 'GRUB via Shim' --unicode
 
-# install the kernel
+# install the kernel (again)
 emerge -a sys-kernel/gentoo-kernel-bin
 
 # make the config
@@ -260,6 +264,9 @@ Pray that grub boots your kernel.
 
 If nothing goes wrong, enjoy Gentoo and Windows dual boot. Now you can play Battlefield 6 
 and occationally use your box to write code or do Linux things in general.
+
+If GRUB boots into a command line section instead of the standard boot menu, follow 
+the next section (Updating GRUB).
 
 Side note, dual boot may cause time desync between 2 systems. In Linux SystemD you can 
 run `timedatectl set-local-rtc 1` with root permissions to fix it. The OpenRC fix is 
